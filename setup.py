@@ -11,6 +11,7 @@ setup(
         'SQLAlchemy',
         'flask_sqlalchemy',
         'pytest',
-        'coverage'
+        'coverage',
+        'pykep'
     ],
 )
