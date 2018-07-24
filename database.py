@@ -23,6 +23,23 @@ class System(db.Model):
     name = db.Column(db.String(32), unique=True, nullable=False)
     barycentre_id = db.Column(db.Integer, db.ForeignKey('Barycentre.id'), unique=True)
 
+class Orbit(db.Model):
+    """ The 6 necessary orbital element to define an orbit """
+    __tablename__ = 'orbits'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Integer, db.ForeignKey('Body.id'))
+    barycentre = db.Column(db.Integer, db.ForeignKey('Barycentre.id'))
+    #elipse shape
+    eccentricity = db.Column(db.Integer, nullable=False)
+    semiMajorAxis = db.Column(db.Integer, nullable=False)
+    #orientation of orbital plane
+    inclination = db.Column(db.Integer, nullable=False)
+    longAscNode = db.Column(db.Integer, nullable=False)
+    #orientation of elipse in orbital plane
+    ArgPeriapsis = db.Column(db.Integer, nullable=False)
+    #body position at epoch (2000-Jan-01 00:00
+    epochTrueAnomaly = db.Column(db.Integer)
+
 class Barycentre(db.Model):
     """ Barycentres databases """
     __tablename__ = 'barycentres'
@@ -34,22 +51,8 @@ class Body(db.Model):
     __tablename__ = 'bodies'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32), unique=True, nullable=False)
-    primaryBody = db.relationship('Barycentre', backref='satelites')
-    lastUpdate = db.Column(db.Date)
-
-    #classical orbital elements
-    eccentricity = db.Column(db.Integer, nullable=False)
-    semiMajorAxis = db.Column(db.Integer, nullable=False)
-    inclination = db.Column(db.Integer, nullable=False)
-    longAscNode = db.Column(db.Integer, nullable=False)
-    ArgPeriapsis = db.Column(db.Integer, nullable=False)
-    epochTrueAnomaly = db.Column(db.Integer, nullable=False)
-
-    #optional orbits data, keeping them from now
-    apoapsis = db.Column(db.Integer)
-    periapsis = db.Column(db.Integer, nullable=False)
-    orbitalPeriod = db.Column(db.Integer, nullable=False)
-    meanAnomaly = db.Column(db.Integer)
+    primaryBody = db.relationship('Body', backref='satelites')
+    barycentre = db.relationship('Barycentre', backref='members') 
 
     #Physics and body characteristics, TODO: moveme to another table (specific to the body type : planet/stars/comets etc)
     mass = db.Column(db.Integer)
