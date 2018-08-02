@@ -20,8 +20,24 @@ def init_db(app=None):
     with db_context(app):
         db.create_all()
 
+def create_orbit(body,bary,orbit):
+    """ Generate an orbit entry"""
+    entry = Orbit(
+        body = body,
+        barycentre = bary,
+        eccentricity = orbit['eccentricity'],
+        semiMajorAxis = orbit['semi_major_axis'],
+        inclination = orbit['inclination'],
+        longAscNode = orbit['long_of_asc_node'],
+        argPeriapsis = orbit['arg_of_periapsis'],
+        epochTrueAnomaly = orbit['true_anomaly']
+    )
+    db.session.add(entry)                        
+
+        
 def populate_db_hztn(app=None):
     """ Populate the database with basics data from JPL horizons telnet service """
+    #TODO: Check if entries exist before adding it
     with db_context(app):
         hztn = Horizons()
         barycentres = hztn.get_barycenters()
@@ -49,48 +65,18 @@ def populate_db_hztn(app=None):
                         db.session.add(satelite)
                         print(body[1])
                         orbit = hztn.get_orbit(body[0],bary[0])
-                        entry = Orbit(
-                            body = satelite.id,
-                            barycentre = barycenter.id,
-                            eccentricity = orbit['eccentricity'],
-                            semiMajorAxis = orbit['semi_major_axis'],
-                            inclination = orbit['inclination'],
-                            longAscNode = orbit['long_of_asc_node'],
-                            argPeriapsis = orbit['arg_of_periapsis'],
-                            epochTrueAnomaly = orbit['true_anomaly']
-                        )
-                        db.session.add(entry)                        
+                        create_orbit(satelite.id, barycenter.id, orbit)
                 
                 print("Getting barycenter orbit...")
                 orbit = hztn.get_orbit(bary[0],0)
-                entry = Orbit(
-                    body = barycenter.id,
-                    barycentre = solarBarycenter.id,
-                    eccentricity = orbit['eccentricity'],
-                    semiMajorAxis = orbit['semi_major_axis'],
-                    inclination = orbit['inclination'],
-                    longAscNode = orbit['long_of_asc_node'],
-                    argPeriapsis = orbit['arg_of_periapsis'],
-                    epochTrueAnomaly = orbit['true_anomaly']
-                )
-                db.session.add(entry)
+                create_orbit(barycenter.id, solarBarycenter.id, orbit)
             else:
                 #special case : sun
                 print("Getting sun orbit toward solarsystem barycenter...")
                 orbit = hztn.get_orbit(10,0)
                 sun = Body(name="Sun")
                 db.session.add(sun)
-                entry = Orbit(
-                    body = sun.id,
-                    barycentre = solarBarycenter.id,
-                    eccentricity = orbit['eccentricity'],
-                    semiMajorAxis = orbit['semi_major_axis'],
-                    inclination = orbit['inclination'],
-                    longAscNode = orbit['long_of_asc_node'],
-                    argPeriapsis = orbit['arg_of_periapsis'],
-                    epochTrueAnomaly = orbit['true_anomaly']
-                )
-                db.session.add(entry)
+                create_orbit(sun.id, solarBarycenter.id, orbit)
 
             #commit changes   
             db.session.commit()
