@@ -24,12 +24,16 @@ def populate_db_hztn(app=None):
     """ Populate the database with basics data from JPL horizons telnet service """
     with db_context(app):
         hztn = Horizons()
-        solarsystem = System( name = "Solar System")
-        db.session.add(solarsystem)
         barycentres = hztn.get_barycenters()
         solarBarycenter = Body(name=barycentres[0][1])
         db.session.add(solarBarycenter)
+        solarsystem = System(
+            name = "Solar System",
+            barycentre_id = solarBarycenter.id
+        )
+        db.session.add(solarsystem)
 
+        
         print("Getting Barycenters list...")
         for bary in barycentres:
             if(bary[0]):
