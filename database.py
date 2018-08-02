@@ -1,4 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate, MigrateCommand
+from flask_script import Manager
+from app import create_app
 import contextlib
 
 db = SQLAlchemy()
@@ -6,7 +9,6 @@ db = SQLAlchemy()
 @contextlib.contextmanager
 def db_context(app):
     if app is None:
-        from app import create_app
         app = create_app()
     with app.app_context():
         yield
@@ -21,14 +23,14 @@ class System(db.Model):
     __tablename__ = 'systems'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32), unique=True, nullable=False)
-    barycentre_id = db.Column(db.Integer, db.ForeignKey('Barycentre.id'), unique=True)
+    barycentre_id = db.Column(db.Integer, db.ForeignKey('barycentres.id'), unique=True)
 
 class Orbit(db.Model):
     """ The 6 necessary orbital element to define an orbit """
     __tablename__ = 'orbits'
     id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.Integer, db.ForeignKey('Body.id'))
-    barycentre = db.Column(db.Integer, db.ForeignKey('Barycentre.id'))
+    body = db.Column(db.Integer, db.ForeignKey('bodies.id'))
+    barycentre = db.Column(db.Integer, db.ForeignKey('barycentres.id'))
     #elipse shape
     eccentricity = db.Column(db.Integer, nullable=False)
     semiMajorAxis = db.Column(db.Integer, nullable=False)
@@ -52,7 +54,7 @@ class Body(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32), unique=True, nullable=False)
     primaryBody = db.relationship('Body', backref='satelites')
-    barycentre = db.relationship('Barycentre', backref='members') 
+    barycentre = db.relationship('barycentres', backref='members') 
 
     #Physics and body characteristics, TODO: moveme to another table (specific to the body type : planet/stars/comets etc)
     mass = db.Column(db.Integer)
@@ -67,3 +69,11 @@ class Body(db.Model):
     axialTilt = db.Column(db.Integer)
     northPRightAsc = db.Column(db.Integer)
     northPDeclination = db.Column(db.Integer)
+
+if __name__ == '__main__':
+    app = create_app()
+    with db_context(app):
+        migrate = Migrate(app,db)
+        manager = Manager(app)
+        manager.add_command('db',MigrateCommand)
+        manager.run()

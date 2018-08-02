@@ -8,3 +8,15 @@ The goal is simply to build an SQLite database with a bunch of script to export 
 
 
 ### Work in progress ###
+
+
+### INSTALL ###
+
+
+Initialize the database :
+
+
+> python database.py db init
+> python database.py db upgrade
+
+
