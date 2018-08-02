@@ -23,14 +23,14 @@ class System(db.Model):
     __tablename__ = 'systems'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32), unique=True, nullable=False)
-    barycentre_id = db.Column(db.Integer, db.ForeignKey('barycentres.id'), unique=True)
+    barycentre_id = db.Column(db.Integer, db.ForeignKey('bodies.id'), unique=True)
 
 class Orbit(db.Model):
     """ The 6 necessary orbital element to define an orbit """
     __tablename__ = 'orbits'
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Integer, db.ForeignKey('bodies.id'))
-    barycentre = db.Column(db.Integer, db.ForeignKey('barycentres.id'))
+    barycentre = db.Column(db.Integer, db.ForeignKey('bodies.id'))
     #elipse shape
     eccentricity = db.Column(db.Integer, nullable=False)
     semiMajorAxis = db.Column(db.Integer, nullable=False)
@@ -42,9 +42,9 @@ class Orbit(db.Model):
     #body position at epoch (2000-Jan-01 00:00
     epochTrueAnomaly = db.Column(db.Integer)
 
-class Barycentre(db.Model):
-    """ Barycentres databases """
-    __tablename__ = 'barycentres'
+class Types(db.Model):
+    """ Types : star, barycentre, planet etc """
+    __tablename__ = 'types'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32))
     
@@ -54,9 +54,13 @@ class Body(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32), unique=True, nullable=False)
     primaryBody = db.relationship('Body', backref='satelites')
-    barycentre = db.relationship('barycentres', backref='members') 
+    type = db.Column(db.Integer, db.ForeignKey('types.id') )
+    physical_properties = db.Column(db.Integer, db.ForeignKey('physics.id'))
 
-    #Physics and body characteristics, TODO: moveme to another table (specific to the body type : planet/stars/comets etc)
+class Physic(db.Model):
+    """ Physica properties """
+    __tablename__ = 'physics'
+    id = db.Column(db.Integer, primary_key=True)
     mass = db.Column(db.Integer)
     density = db.Column(db.Integer)
     equatRadius = db.Column(db.Integer)

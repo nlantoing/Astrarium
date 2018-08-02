@@ -20,3 +20,10 @@ Initialize the database :
 > python database.py db upgrade
 
 
+### UPGRADE ###
+
+
+Apply database patches:
+
+
+> python database.py db upgrade
