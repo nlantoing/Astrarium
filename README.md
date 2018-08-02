@@ -16,7 +16,6 @@ The goal is simply to build an SQLite database with a bunch of script to export 
 Initialize the database :
 
 
-> python database.py db init
 > python database.py db upgrade
 
 

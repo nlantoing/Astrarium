@@ -2,7 +2,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 from app import create_app
+from horizons import Horizons
 import contextlib
+import click
 
 db = SQLAlchemy()
 
@@ -17,6 +19,77 @@ def init_db(app=None):
     """ Initialize the database """
     with db_context(app):
         db.create_all()
+
+def populate_db_hztn(app=None):
+    """ Populate the database with basics data from JPL horizons telnet service """
+    with db_context(app):
+        hztn = Horizons()
+        solarsystem = System( name = "Solar System")
+        db.session.add(solarsystem)
+        barycentres = hztn.get_barycenters()
+        solarBarycenter = Body(name=barycentres[0][1])
+        db.session.add(solarBarycenter)
+
+        print("Getting Barycenters list...")
+        for bary in barycentres:
+            if(bary[0]):
+                barycenter = Body(name=bary[1])
+                db.session.add(barycenter)
+                print (bary[1])
+                print("Getting barycenter members list...")
+                members = hztn.get_barycenter_members(bary[0])
+                if(len(members) > 1):
+                    print("Getting satelites orbits...")
+                    for body in members:
+                        satelite = Body(name=body[1])
+                        db.session.add(satelite)
+                        print(body[1])
+                        orbit = hztn.get_orbit(body[0],bary[0])
+                        entry = Orbit(
+                            body = satelite.id,
+                            barycentre = barycenter.id,
+                            eccentricity = orbit['eccentricity'],
+                            semiMajorAxis = orbit['semi_major_axis'],
+                            inclination = orbit['inclination'],
+                            longAscNode = orbit['long_of_asc_node'],
+                            argPeriapsis = orbit['arg_of_periapsis'],
+                            epochTrueAnomaly = orbit['true_anomaly']
+                        )
+                        db.session.add(entry)                        
+                
+                print("Getting barycenter orbit...")
+                orbit = hztn.get_orbit(bary[0],0)
+                entry = Orbit(
+                    body = barycenter.id,
+                    barycentre = solarBarycenter.id,
+                    eccentricity = orbit['eccentricity'],
+                    semiMajorAxis = orbit['semi_major_axis'],
+                    inclination = orbit['inclination'],
+                    longAscNode = orbit['long_of_asc_node'],
+                    argPeriapsis = orbit['arg_of_periapsis'],
+                    epochTrueAnomaly = orbit['true_anomaly']
+                )
+                db.session.add(entry)
+            else:
+                #special case : sun
+                print("Getting sun orbit toward solarsystem barycenter...")
+                orbit = hztn.get_orbit(10,0)
+                sun = Body(name="Sun")
+                db.session.add(sun)
+                entry = Orbit(
+                    body = sun.id,
+                    barycentre = solarBarycenter.id,
+                    eccentricity = orbit['eccentricity'],
+                    semiMajorAxis = orbit['semi_major_axis'],
+                    inclination = orbit['inclination'],
+                    longAscNode = orbit['long_of_asc_node'],
+                    argPeriapsis = orbit['arg_of_periapsis'],
+                    epochTrueAnomaly = orbit['true_anomaly']
+                )
+                db.session.add(entry)
+
+            #commit changes   
+            db.session.commit()
 
 class System(db.Model):
     """ Star object definition """
@@ -38,7 +111,7 @@ class Orbit(db.Model):
     inclination = db.Column(db.Integer, nullable=False)
     longAscNode = db.Column(db.Integer, nullable=False)
     #orientation of elipse in orbital plane
-    ArgPeriapsis = db.Column(db.Integer, nullable=False)
+    argPeriapsis = db.Column(db.Integer, nullable=False)
     #body position at epoch (2000-Jan-01 00:00
     epochTrueAnomaly = db.Column(db.Integer)
 
@@ -53,7 +126,7 @@ class Body(db.Model):
     __tablename__ = 'bodies'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(32), unique=True, nullable=False)
-    primaryBody = db.relationship('Body', backref='satelites')
+    #primaryBody = db.relationship('Body', backref='satelites')
     type = db.Column(db.Integer, db.ForeignKey('types.id') )
     physical_properties = db.Column(db.Integer, db.ForeignKey('physics.id'))
 

@@ -141,7 +141,10 @@ class Horizons:
         self.tn.write("y\n".encode('ascii'))
 
         #parse results
-        self.tn.read_until(b"EC= ")
+        
+        self.tn.read_until(b"EC= ",self.timeout)
+        
+        
         results['eccentricity'] = self.get_scivalue()
         results['periapsis_distance'] = self.get_scivalue()
         results['inclination'] = self.get_scivalue()
