@@ -12,6 +12,7 @@ The goal is simply to build an SQLite database with a bunch of script to export 
 
 ### INSTALL ###
 
+> pip install .
 
 Initialize the database :
 
@@ -26,3 +27,9 @@ Apply database patches:
 
 
 > python database.py db upgrade
+
+### TESTS ###
+
+Run tests :
+
+> pytest

@@ -32,4 +32,4 @@ def test_essential_orbit():
     print(result)
     result = hztn.get_orbit(neptune,neptune_system)
     print(result)
-    assert result['eccentricity'] == 2.530231847781815e-05
+    assert result['eccentricity'] ==  0.004492338553255954
