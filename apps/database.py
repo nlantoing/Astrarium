@@ -1,8 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
-from app import create_app
-from horizons import Horizons
+from apps.app import create_app
+from apps.horizons import Horizons
 import contextlib
 import click
 

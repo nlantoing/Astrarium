@@ -1,4 +1,4 @@
-from horizons import Horizons
+from apps.horizons import Horizons
 
 hztn = Horizons()
 

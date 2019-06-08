@@ -1,8 +1,8 @@
 import os
 import tempfile
 import pytest
-from app import create_app
-from database import db, init_db
+from apps.app import create_app
+from apps.database import db, init_db
 
 @pytest.fixture
 def app():
