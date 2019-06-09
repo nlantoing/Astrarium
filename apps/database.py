@@ -34,7 +34,14 @@ def create_orbit(body,bary,orbit):
     )
     db.session.add(entry)                        
 
-        
+
+def drop_all(app=None):
+    engine = db.create_engine('sqlite:///astrarium.db')
+    connection = engine.connect()
+    metadata = db.MetaData()
+    metadata.drop_all(engine)
+    
+
 def populate_db_hztn(app=None):
     """ Populate the database with basics data from JPL horizons telnet service """
     #TODO: Check if entries exist before adding it
@@ -48,13 +55,19 @@ def populate_db_hztn(app=None):
             barycentre_id = solarBarycenter.id
         )
         db.session.add(solarsystem)
-
+        
+        #commit changes   
+        db.session.commit()
         
         print("Getting Barycenters list...")
         for bary in barycentres:
             if(bary[0]):
                 barycenter = Body(name=bary[1])
                 db.session.add(barycenter)
+
+                #commit changes   
+                db.session.commit()
+                
                 print (bary[1])
                 print("Getting barycenter members list...")
                 members = hztn.get_barycenter_members(bary[0])
@@ -63,12 +76,16 @@ def populate_db_hztn(app=None):
                     for body in members:
                         satelite = Body(name=body[1])
                         db.session.add(satelite)
+
+                        #commit changes   
+                        db.session.commit()
+                        
                         print(body[1])
                         orbit = hztn.get_orbit(body[0],bary[0])
                         create_orbit(satelite.id, barycenter.id, orbit)
                 
                 print("Getting barycenter orbit...")
-                orbit = hztn.get_orbit(bary[0],0)
+                orbit = hztn.get_orbit(bary[0],0)                
                 create_orbit(barycenter.id, solarBarycenter.id, orbit)
             else:
                 #special case : sun
@@ -76,6 +93,10 @@ def populate_db_hztn(app=None):
                 orbit = hztn.get_orbit(10,0)
                 sun = Body(name="Sun")
                 db.session.add(sun)
+                
+                #commit changes   
+                db.session.commit()
+                
                 create_orbit(sun.id, solarBarycenter.id, orbit)
 
             #commit changes   

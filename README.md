@@ -28,6 +28,12 @@ Apply database patches:
 
 > python database.py db upgrade
 
+
+### START ###
+
+execute start.sh
+
+  
 ### TESTS ###
 
 Run tests :

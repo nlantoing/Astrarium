@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from flask_cors import CORS
 
 def create_app(test_config=None):
     # create and configure the app
@@ -25,10 +26,12 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from database import db
+    from apps.database import db
     db.init_app(app)
     
-    import forms
-    app.register_blueprint(forms.bp)
+    # import apps.forms
+    # app.register_blueprint(forms.bp)
+
+    CORS(app)
     
     return app
