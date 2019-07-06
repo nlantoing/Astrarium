@@ -7,7 +7,7 @@ from apps.app import create_app
 app = create_app()
 
 def _getEngine():
-    engine = db.create_engine('sqlite:///astrarium.db')
+    engine = db.create_engine('sqlite:///astrarium.db', {})
     connection = engine.connect()
     return connection
 

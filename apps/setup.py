@@ -12,6 +12,7 @@ setup(
         'flask_sqlalchemy',
         'flask_migrate',
         'flask_script',
+        'flask_cors',
         'pytest',
         'coverage',
         'pykep'
