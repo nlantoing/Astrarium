@@ -85,7 +85,7 @@ class System(db.Model):
     """ Star object definition """
     __tablename__ = 'systems'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(32), unique=True, nullable=False)
+    name = db.Column(db.String(32), unique=False, nullable=False)
     barycentre_id = db.Column(db.Integer, db.ForeignKey('bodies.id'), unique=True)
 
 class Orbit(db.Model):
@@ -115,7 +115,7 @@ class Body(db.Model):
     """ Contain the basic physic informations of an astronomical body  """
     __tablename__ = 'bodies'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(32), unique=True, nullable=False)
+    name = db.Column(db.String(32), unique=False, nullable=False)
     #primaryBody = db.relationship('Body', backref='satelites')
     type = db.Column(db.Integer, db.ForeignKey('types.id') )
     physical_properties = db.Column(db.Integer, db.ForeignKey('physics.id'))

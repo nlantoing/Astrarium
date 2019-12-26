@@ -19,6 +19,10 @@ Initialize the database :
 
 > python database.py db upgrade
 
+Populate the database :
+
+> import database
+> database.populate_db_hztn()
 
 ### UPGRADE ###
 
